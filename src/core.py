@@ -72,7 +72,7 @@ def rashet_x1_x2_x3(df_agg, udelka):
     df_agg['koef_K'] = (df_agg['gran_10_first'] + df_agg['gran_5-10_first'] + df_agg['gran_5-2_first'] + df_agg[
         'gran_2-1_first'])
 
-    df_agg = df_agg.dropna(subset=['3_zamer/temp_first'])
+    df_agg = df_agg.dropna(subset=['3_zamer/temp_first']).copy()
 
     df_agg['X1'] = df_agg['udelka'] * df_agg['zamer_1'] / (df_agg['udelka'] - 1) / df_agg[
         'kolba/naveska_s_rast_last'] * (100 - df_agg['koef_K'])

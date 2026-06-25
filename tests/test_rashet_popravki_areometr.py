@@ -1,6 +1,6 @@
-from core import rashet_popravki_areometr, rashet_x1_x2_x3, itog_raschet_gran
+from src.core import rashet_popravki_areometr, rashet_x1_x2_x3, itog_raschet_gran
 import pandas as pd
-import pytest
+
 
 def test_rashet_popravki_areometr(dfs_popravki_test):
     df_input = dfs_popravki_test['df_input']
