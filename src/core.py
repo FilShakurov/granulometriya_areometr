@@ -103,8 +103,8 @@ def itog_raschet_gran(df_agg):
     df_agg[src.config.cols_kr_prozent] = df_agg[src.config.cols_kr_prozent].round(1)
     df_agg[src.config.cols_melk_prozent] = df_agg[src.config.cols_melk_prozent].round(1)
 
-    df_agg['gran_0,10-0,05_%'] = 100 - df_agg[src.config.cols_kr_prozent].sum(axis=1) - df_agg[
-        src.config.cols_melk_prozent].sum(axis=1)
+    df_agg['gran_0,10-0,05_%'] = (100 - df_agg[src.config.cols_kr_prozent].sum(axis=1) - df_agg[
+        src.config.cols_melk_prozent].sum(axis=1)).round(1)
 
     return df_agg
 

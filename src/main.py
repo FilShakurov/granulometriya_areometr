@@ -1,6 +1,8 @@
 from core import zagr_file, zagr_tarirovki, obrabotka_df_posle_zagr, rashet_gran
 import src.config
+from src.database.database import DatabaseSample
 
+db = DatabaseSample("database.db")
 PATH_NAMIV = "../test_namiv2.xlsx"
 PATH_TARIROVKI = "../tarirovki.xlsx"
 udelka = 2.7

@@ -1,4 +1,5 @@
 COlUMNS = {
+    'Вписать номер без преффикса': "nomer_predv",
     'Регистационный номер пробы': "lab_nomer",
     'Номер колбы_Масса возд. сух. навески, г': 'kolba/naveska_s_rast',
     'Номер колбы_Масса возд. сух. навески, г с учетом РО': "kolba/naveska",
@@ -31,6 +32,7 @@ COLS_GRAN_KOEF_K = [
 ]
 
 agg_dict = {
+    'nomer_predv': 'first',
     'kolba/naveska_s_rast': 'last',
     'kolba/naveska': 'last',
     'areometr': 'first',
@@ -80,3 +82,17 @@ cols_melk_prozent = [
     'gran_0.01-0.002_%',
     'gran_0.002_%'
 ]
+
+cols_bd_rename = {
+    'gran_10_%': "gran_10",
+    'gran_5-10_%': "gran_5_10",
+    'gran_5-2_%': "gran_5_2",
+    'gran_2-1_%': "gran_2_1",
+    'gran_1-0,5_%': "gran_1_0_5",
+    'gran_0,5-0,25_%': "gran_0_5_0_25",
+    'gran_0,25-0,10_%': "gran_0_25_0_10",
+    'gran_0,10-0,05_%': "gran_0_10_0_05",
+    'gran_0.05-0.01_%': "gran_0_05_0_01",
+    'gran_0.01-0.002_%': "gran_0_01_0_002",
+    'gran_0.002_%': "gran_0_002"
+}
