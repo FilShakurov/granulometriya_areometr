@@ -1,13 +1,13 @@
 import pandas as pd
-import config
+import src.config
 
 def zagr_file(path):
     df = pd.read_excel(path, skiprows=4, header=[0, 1, 2], na_values="-")
 
     df.columns = [process_multiheader_column(col) for col in df.columns]
 
-    df = df.rename(columns=config.COlUMNS)
-    df = df[config.COlUMNS.values()]
+    df = df.rename(columns=src.config.COlUMNS)
+    df = df[src.config.COlUMNS.values()]
 
     return df
 
@@ -30,12 +30,12 @@ def process_multiheader_column(col):
 def obrabotka_df_posle_zagr(df):
     df['lab_nomer'] = df['lab_nomer'].ffill()
 
-    df_agg = df.groupby('lab_nomer').agg({**config.agg_dict, **config.temp_agg})
+    df_agg = df.groupby('lab_nomer').agg({**src.config.agg_dict, **src.config.temp_agg})
 
     df_agg.columns = [process_multiheader_column(col) for col in df_agg.columns]
     df_agg = df_agg.reset_index()
 
-    df_agg[config.COLS_GRAN] = df_agg[config.COLS_GRAN].fillna(0)
+    df_agg[src.config.COLS_GRAN] = df_agg[src.config.COLS_GRAN].fillna(0)
 
     return df_agg
 
@@ -85,7 +85,7 @@ def rashet_x1_x2_x3(df_agg, udelka):
 
 
 def itog_raschet_gran(df_agg):
-    df_agg['m_probi_bez_krupn'] = df_agg['kolba/naveska_last'] - df_agg[config.COLS_GRAN_KOEF_K].sum(axis=1)
+    df_agg['m_probi_bez_krupn'] = df_agg['kolba/naveska_last'] - df_agg[src.config.COLS_GRAN_KOEF_K].sum(axis=1)
 
     df_agg['gran_10_%'] = df_agg['gran_10_first'] / df_agg['kolba/naveska_last'] * 100
     df_agg['gran_5-10_%'] = df_agg['gran_5-10_first'] / df_agg['kolba/naveska_last'] * 100
@@ -100,8 +100,11 @@ def itog_raschet_gran(df_agg):
     df_agg['gran_0.01-0.002_%'] = df_agg['X2'] - df_agg['X3']
     df_agg['gran_0.002_%'] = df_agg['X3']
 
-    df_agg['gran_0,10-0,05_%'] = 100 - df_agg[config.cols_kr_prozent].sum(axis=1) - df_agg[
-        config.cols_melk_prozent].sum(axis=1)
+    df_agg[src.config.cols_kr_prozent] = df_agg[src.config.cols_kr_prozent].round(1)
+    df_agg[src.config.cols_melk_prozent] = df_agg[src.config.cols_melk_prozent].round(1)
+
+    df_agg['gran_0,10-0,05_%'] = 100 - df_agg[src.config.cols_kr_prozent].sum(axis=1) - df_agg[
+        src.config.cols_melk_prozent].sum(axis=1)
 
     return df_agg
 

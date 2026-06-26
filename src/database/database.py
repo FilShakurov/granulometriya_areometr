@@ -22,7 +22,7 @@ class DatabaseSample:
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS proby (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                num_proby TEXT NOT NULL
+                lab_nomer TEXT NOT NULL
             )
         """)
 
@@ -51,7 +51,7 @@ class DatabaseSample:
         conn.commit()
         conn.close()
 
-    def add_proby_and_granulometry_from_df(self, df: pd.DataFrame, sample_col: str = "num_proby"):
+    def add_proby_and_granulometry_from_df(self, df: pd.DataFrame, sample_col: str = "lab_nomer"):
         required_cols = [
             sample_col,
             "gran_10",
@@ -78,7 +78,7 @@ class DatabaseSample:
             cursor.execute("PRAGMA foreign_keys = ON")
 
             insert_proba_sql = """
-                INSERT INTO proby (num_proby)
+                INSERT INTO proby (lab_nomer)
                 VALUES (?)
             """
 
@@ -101,16 +101,16 @@ class DatabaseSample:
             """
 
             for row in df.itertuples(index=False):
-                num_proby = getattr(row, sample_col)
+                lab_nomer = getattr(row, sample_col)
 
-                if pd.isna(num_proby):
+                if pd.isna(lab_nomer):
                     continue
 
-                num_proby = str(num_proby).strip()
-                if not num_proby:
+                lab_nomer = str(lab_nomer).strip()
+                if not lab_nomer:
                     continue
 
-                cursor.execute(insert_proba_sql, (num_proby,))
+                cursor.execute(insert_proba_sql, (lab_nomer,))
                 proba_id = cursor.lastrowid
 
                 cursor.execute(
@@ -141,26 +141,26 @@ class DatabaseSample:
             conn.close()
 
 
-db = DatabaseSample("database.db")
-
-data = {
-    "num_proby": [155],
-    "gran_10": [33],
-    "gran_5_10": [155],
-    "gran_5_2": [155],
-    "gran_2_1": [155],
-    "gran_1_0_5": [155],
-    "gran_0_5_0_25": [155],
-    "gran_0_25_0_10": [155],
-    "gran_0_10_0_05": [155],
-    "gran_0_05_0_01": [155],
-    "gran_0_01_0_002": [155],
-    "gran_0_002": [33]
-}
-
-df_itog = pd.DataFrame(data)
-
-db.add_proby_and_granulometry_from_df(df_itog)
+# db = DatabaseSample("database.db")
+#
+# data = {
+#     "lab_nomer": [155, 11],
+#     "gran_10": [33, 11],
+#     "gran_5_10": [155, 11],
+#     "gran_5_2": [155, 11],
+#     "gran_2_1": [155, 11],
+#     "gran_1_0_5": [155, 11],
+#     "gran_0_5_0_25": [155, 11],
+#     "gran_0_25_0_10": [155, 11],
+#     "gran_0_10_0_05": [155, 11],
+#     "gran_0_05_0_01": [155, 11],
+#     "gran_0_01_0_002": [155, 11],
+#     "gran_0_002": [33, 11]
+# }
+#
+# df_itog = pd.DataFrame(data)
+#
+# db.add_proby_and_granulometry_from_df(df_itog)
 
 
 
