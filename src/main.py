@@ -90,10 +90,6 @@ class MainWindow(QMainWindow):
         df_agg.to_excel(file_path)
 
 
-
-
-
-
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()

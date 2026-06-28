@@ -1,5 +1,3 @@
-from openpyxl.utils import cols_from_range
-
 COlUMNS = {
     'Вписать номер без преффикса': "nomer_predv",
     'Регистационный номер пробы': "lab_nomer",
@@ -27,18 +25,18 @@ COLUMNS_OBYAZAT1 = [
     '3_zamer/temp',
 ]
 
-COLS_GRAN = [
-    'gran_10_first', 'gran_5-10_first',
-    'gran_5-2_first', 'gran_2-1_first',
-    'gran_1-0,5_first', 'gran_0,5-0,25_first',
-    'gran_0,25-0,10_first'
-]
-
 COLS_GRAN_KOEF_K = [
     'gran_10_first',
     'gran_5-10_first',
     'gran_5-2_first',
     'gran_2-1_first',
+]
+
+COLS_GRAN = [
+    *COLS_GRAN_KOEF_K,
+    'gran_1-0,5_first',
+    'gran_0,5-0,25_first',
+    'gran_0,25-0,10_first'
 ]
 
 agg_dict = {
@@ -62,25 +60,6 @@ temp_agg = {
     '3_zamer/temp': ['first', 'last'],
 }
 
-cols_prozent = [
-    'gran_10_%',
-    'gran_5-10_%',
-    'gran_5-2_%',
-    'gran_2-1_%',
-    'gran_1-0,5_%',
-    'gran_0,5-0,25_%',
-    'gran_0,25-0,10_%',
-    'gran_0,10-0,05_%',
-    'gran_0.05-0.01_%',
-    'gran_0.01-0.002_%',
-    'gran_0.002_%'
-]
-
-cols_prozent_vse = [
-    'lab_nomer',
-    *cols_prozent,
-]
-
 cols_kr_prozent = [
     'gran_10_%',
     'gran_5-10_%',
@@ -95,6 +74,17 @@ cols_melk_prozent = [
     'gran_0.05-0.01_%',
     'gran_0.01-0.002_%',
     'gran_0.002_%'
+]
+
+cols_prozent = [
+    *cols_kr_prozent,
+    'gran_0,10-0,05_%',
+    *cols_melk_prozent
+]
+
+cols_prozent_vse = [
+    'lab_nomer',
+    *cols_prozent,
 ]
 
 cols_bd_rename = {
