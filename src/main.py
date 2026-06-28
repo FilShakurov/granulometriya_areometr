@@ -12,6 +12,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.db = DatabaseSample("database/database.db")
+        self.df_itog = None
 
         self.initUI()
 
@@ -28,6 +29,10 @@ class MainWindow(QMainWindow):
         self.btn = QPushButton("Загрузить намыв")
         self.btn.clicked.connect(self.zagr_namiv)
         main_layout.addWidget(self.btn)
+
+        self.btn2 = QPushButton("Сохранить в бд намыв")
+        self.btn2.clicked.connect(self.save_gran_bd)
+        main_layout.addWidget(self.btn2)
 
     def zagr_namiv(self):
         try:
@@ -51,9 +56,7 @@ class MainWindow(QMainWindow):
             if spisok_otrizat_grani:
                 QMessageBox.warning(self, "Внимание", f"Есть отрицательные граны {spisok_otrizat_grani}")
 
-            df_db = df_itog.rename(columns=config.cols_bd_rename)
-
-            self.db.add_proby_and_granulometry_from_df(df_db)
+            self.df_itog = df_itog.rename(columns=config.cols_bd_rename)
 
             self.save_rashet_namiva(df_agg)
 
@@ -62,6 +65,16 @@ class MainWindow(QMainWindow):
             print(e)
             QMessageBox.critical(self, "Ошибка", f"Ошибка {e}")
             traceback.print_exc()
+
+
+    def save_gran_bd(self):
+        if self.df_itog is None or self.df_itog.empty:
+            QMessageBox.critical(self, "Ошибка", "Таблица пустая!")
+            return
+
+        self.db.add_proby_and_granulometry_from_df(self.df_itog)
+
+        QMessageBox.information(self, "Успех", f"Граны ({len(self.df_itog)} шт.) в базе данных")
 
 
     def save_rashet_namiva(self, df_agg):
