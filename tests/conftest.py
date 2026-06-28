@@ -1,5 +1,8 @@
+import sys
+
 import pytest
 import pandas as pd
+
 
 @pytest.fixture
 def dfs_popravki_test():

@@ -1,3 +1,5 @@
+from openpyxl.utils import cols_from_range
+
 COlUMNS = {
     'Вписать номер без преффикса': "nomer_predv",
     'Регистационный номер пробы': "lab_nomer",
@@ -16,6 +18,14 @@ COlUMNS = {
     'Масса фракций, г_0,5-0,25': 'gran_0,5-0,25',
     'Масса фракций, г_0,25-0,10': 'gran_0,25-0,10',
 }
+
+COLUMNS_OBYAZAT1 = [
+    "lab_nomer",
+    "kolba/naveska",
+    '1_zamer/temp',
+    '2_zamer/temp',
+    '3_zamer/temp',
+]
 
 COLS_GRAN = [
     'gran_10_first', 'gran_5-10_first',
@@ -52,8 +62,7 @@ temp_agg = {
     '3_zamer/temp': ['first', 'last'],
 }
 
-cols_prozent_vse = [
-    'lab_nomer',
+cols_prozent = [
     'gran_10_%',
     'gran_5-10_%',
     'gran_5-2_%',
@@ -65,6 +74,11 @@ cols_prozent_vse = [
     'gran_0.05-0.01_%',
     'gran_0.01-0.002_%',
     'gran_0.002_%'
+]
+
+cols_prozent_vse = [
+    'lab_nomer',
+    *cols_prozent,
 ]
 
 cols_kr_prozent = [

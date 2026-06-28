@@ -1,13 +1,13 @@
 import pandas as pd
-import src.config
+import config
 
 def zagr_file(path):
-    df = pd.read_excel(path, skiprows=4, header=[0, 1, 2], na_values="-")
+    df = pd.read_excel(path, skiprows=4, header=[0, 1, 2], na_values=["-", "26_", "27_"])
 
     df.columns = [process_multiheader_column(col) for col in df.columns]
 
-    df = df.rename(columns=src.config.COlUMNS)
-    df = df[src.config.COlUMNS.values()]
+    df = df.rename(columns=config.COlUMNS)
+    df = df[config.COlUMNS.values()]
 
     return df
 
@@ -28,14 +28,20 @@ def process_multiheader_column(col):
 
 
 def obrabotka_df_posle_zagr(df):
-    df['lab_nomer'] = df['lab_nomer'].ffill()
+    df['lab_nomer'] = df['lab_nomer'].ffill(limit=1)
 
-    df_agg = df.groupby('lab_nomer').agg({**src.config.agg_dict, **src.config.temp_agg})
+    df = df.dropna(subset=['lab_nomer'])
+
+    validate_no_missing(df, config.COLUMNS_OBYAZAT1)
+
+    df_agg = df.groupby('lab_nomer').agg({**config.agg_dict, **config.temp_agg})
 
     df_agg.columns = [process_multiheader_column(col) for col in df_agg.columns]
     df_agg = df_agg.reset_index()
 
-    df_agg[src.config.COLS_GRAN] = df_agg[src.config.COLS_GRAN].fillna(0)
+    df_agg[config.COLS_GRAN] = df_agg[config.COLS_GRAN].fillna(0)
+
+    df_agg = df_agg.dropna(subset=['nomer_predv_first'])
 
     return df_agg
 
@@ -62,8 +68,16 @@ def rashet_popravki_areometr(df_agg, df_tarirovk):
 def get_value1(row, ref_df, col_temp):
     idx = row['areometr_first']
     col = row[col_temp]
+
+
+    if idx not in ref_df.index:
+        raise KeyError(f"Для пробы {row['lab_nomer']} ареометр {idx} отсутствует в тарировке!")
+
+    if col not in ref_df.columns:
+        raise KeyError(f"Для пробы {row['lab_nomer']} температура {col} отсутствует в тарировках!")
+
     # .at работает быстро для одиночного доступа по метке
-    return ref_df.at[idx, col] if idx in ref_df.index and col in ref_df.columns else None
+    return ref_df.at[idx, col]
 
 
 def rashet_x1_x2_x3(df_agg, udelka):
@@ -72,7 +86,7 @@ def rashet_x1_x2_x3(df_agg, udelka):
     df_agg['koef_K'] = (df_agg['gran_10_first'] + df_agg['gran_5-10_first'] + df_agg['gran_5-2_first'] + df_agg[
         'gran_2-1_first'])
 
-    df_agg = df_agg.dropna(subset=['3_zamer/temp_first']).copy()
+    # df_agg = df_agg.dropna(subset=['3_zamer/temp_first']).copy()
 
     df_agg['X1'] = df_agg['udelka'] * df_agg['zamer_1'] / (df_agg['udelka'] - 1) / df_agg[
         'kolba/naveska_s_rast_last'] * (100 - df_agg['koef_K'])
@@ -85,7 +99,7 @@ def rashet_x1_x2_x3(df_agg, udelka):
 
 
 def itog_raschet_gran(df_agg):
-    df_agg['m_probi_bez_krupn'] = df_agg['kolba/naveska_last'] - df_agg[src.config.COLS_GRAN_KOEF_K].sum(axis=1)
+    df_agg['m_probi_bez_krupn'] = df_agg['kolba/naveska_last'] - df_agg[config.COLS_GRAN_KOEF_K].sum(axis=1)
 
     df_agg['gran_10_%'] = df_agg['gran_10_first'] / df_agg['kolba/naveska_last'] * 100
     df_agg['gran_5-10_%'] = df_agg['gran_5-10_first'] / df_agg['kolba/naveska_last'] * 100
@@ -100,11 +114,11 @@ def itog_raschet_gran(df_agg):
     df_agg['gran_0.01-0.002_%'] = df_agg['X2'] - df_agg['X3']
     df_agg['gran_0.002_%'] = df_agg['X3']
 
-    df_agg[src.config.cols_kr_prozent] = df_agg[src.config.cols_kr_prozent].round(1)
-    df_agg[src.config.cols_melk_prozent] = df_agg[src.config.cols_melk_prozent].round(1)
+    df_agg[config.cols_kr_prozent] = df_agg[config.cols_kr_prozent].round(1)
+    df_agg[config.cols_melk_prozent] = df_agg[config.cols_melk_prozent].round(1)
 
-    df_agg['gran_0,10-0,05_%'] = (100 - df_agg[src.config.cols_kr_prozent].sum(axis=1) - df_agg[
-        src.config.cols_melk_prozent].sum(axis=1)).round(1)
+    df_agg['gran_0,10-0,05_%'] = (100 - df_agg[config.cols_kr_prozent].sum(axis=1) - df_agg[
+        config.cols_melk_prozent].sum(axis=1)).round(1)
 
     return df_agg
 
@@ -114,4 +128,30 @@ def rashet_gran(df_agg, df_tarirovk, udelka):
     df_agg = rashet_x1_x2_x3(df_agg, udelka)
     df_agg = itog_raschet_gran(df_agg)
 
-    return df_agg
+    df_itog = df_agg[config.cols_prozent_vse].copy()
+    spisok_otricat_grani = proverka_grana(df_itog)
+
+    return df_itog, spisok_otricat_grani
+
+
+def proverka_grana(df_itog):
+    mask = (df_itog[config.cols_prozent]<0).any(axis=1)
+    spisok_otricat_grani = list(df_itog.loc[mask, 'lab_nomer'])
+
+    return spisok_otricat_grani
+
+
+def validate_no_missing(df: pd.DataFrame, cols: list[str]) -> None:
+    # Проверяем, есть ли вообще пропуски в этих столбцах
+    if df[cols].isna().any().any():
+        # Выбираем строки с пропусками хотя бы в одном из указанных столбцов
+        rows_with_na = df[df[cols].isna().any(axis=1)]
+
+        # Можно вывести эти строки в лог / консоль
+        print("Обнаружены пропуски в столбцах:", cols)
+        print(rows_with_na)
+
+        # И бросить исключение с краткой информацией
+        raise ValueError(
+            f"В столбцах {cols} обнаружены пропуски. "
+            f"Количество строк с пропусками: {len(rows_with_na)}")
